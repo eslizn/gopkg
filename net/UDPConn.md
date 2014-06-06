@@ -45,7 +45,7 @@ UDPConn是Conn接口的实现
 
 ## func ListenUDP(net string, laddr *UDPAddr) (*UDPConn, error)
 
-参数列表@todo
+参数列表
 
 - net UDP类型
 - laddr 本地地址
@@ -105,6 +105,54 @@ UDPConn是Conn接口的实现
 ## func (c *UDPConn) ReadFrom(b []byte) (int, Addr, error)
 
 ## func (c *UDPConn) ReadFromUDP(b []byte) (n int, addr *UDPAddr, err error)
+
+参数列表
+
+- b buffer缓冲区
+
+返回值：
+- n 读入字节数
+- addr 远程地址
+- err 错误(如果有)
+
+功能说明：
+
+从UDP句柄中取出数据并填充到预分配buffer中
+
+代码实例：
+
+    package main
+    
+    import (
+    	"fmt"
+    	"net"
+    )
+    
+    func main() {
+    	addr, err := net.ResolveUDPAddr("udp", ":53")
+    	if err != nil {
+    		fmt.Println(err)
+    		return
+    	}
+    	listen, err := net.ListenUDP("udp", addr)
+    	if err != nil {
+    		fmt.Println(err)
+    		return
+    	}
+    	defer listen.Close()
+    	for {
+    		//max udp size = MTU(default) - IP Header - UDP Header = 1500 - 20 - 8
+    		data := make([]byte, 1472)
+    
+    		length, remoteAddr, err := listen.ReadFromUDP(data)
+    		if err != nil {
+    			fmt.Println(err)
+    			continue
+    		}
+    		fmt.Println("data length : ", length, "remote : ", remoteAddr)
+    	}
+    }
+
 
 ## func (c *UDPConn) ReadMsgUDP(b, oob []byte) (n, oobn, flags int, addr *UDPAddr, err error)
 
